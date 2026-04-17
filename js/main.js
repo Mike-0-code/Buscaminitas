@@ -12,10 +12,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let renderer = null;
     let gameState = null;
     let inputHandler = null;
+
+    function updateMineCount(difficulty) {
+        const mineCountElement = document.getElementById('mine-count');
+        if (mineCountElement) {
+            mineCountElement.textContent = LEVELS[difficulty].mines;
+        }
+    }
     
     function initGame(difficulty) {
         const level = LEVELS[difficulty];
         if (!level) return;
+
+        updateMineCount(difficulty);  
         
         if (inputHandler) {
             inputHandler.destroy();
@@ -87,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function changeDifficulty(difficulty) {
         currentDifficulty = difficulty;
         localStorage.setItem('minesweeper_difficulty', difficulty);
+        updateMineCount(difficulty);  
         initGame(difficulty);
         
         document.querySelectorAll('.difficulty-buttons button').forEach(btn => {

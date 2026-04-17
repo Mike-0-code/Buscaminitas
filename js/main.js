@@ -1,5 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
-    let currentDifficulty = 'normal';
+    // ========== NUEVO: Cargar dificultad guardada ==========
+    function getSavedDifficulty() {
+        const saved = localStorage.getItem('minesweeper_difficulty');
+        // Validar que la dificultad guardada existe en LEVELS
+        if (saved && LEVELS[saved]) {
+            return saved;
+        }
+        return 'normal'; // Default
+    }
+    
+    let currentDifficulty = getSavedDifficulty();  // ← CAMBIADO: usar función
     let board = null;
     let renderer = null;
     let gameState = null;
@@ -84,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'already_revealed':
             case 'invalid':
             default:
-                // Solo actualizar el renderizado si es necesario
                 if (result.type === 'safe') {
                     renderer.render();
                 }
@@ -102,6 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function changeDifficulty(difficulty) {
         currentDifficulty = difficulty;
+        // ========== NUEVO: Guardar en localStorage ==========
+        localStorage.setItem('minesweeper_difficulty', difficulty);
         initGame(difficulty);
         
         document.querySelectorAll('.difficulty-buttons button').forEach(btn => {
@@ -127,6 +138,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Iniciar juego
-    initGame('normal');
+    // ========== CAMBIADO: iniciar con dificultad guardada ==========
+    initGame(currentDifficulty);
+    
+    // ========== NUEVO: Marcar botón activo según dificultad guardada ==========
+    document.querySelectorAll('.difficulty-buttons button').forEach(btn => {
+        if (btn.dataset.difficulty === currentDifficulty) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
 });

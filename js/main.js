@@ -45,10 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Configurar listener de gameState para actualizar UI automáticamente
-        gameState.addListener((state) => {
-            if (state === GameState.VICTORY) {
-                renderer.showVictoryAnimation();
-        });
+gameState.addListener((state) => {
+    if (state === GameState.VICTORY) {
+        renderer.showVictoryAnimation();
+    }
+});
         
         // Renderizar tablero inicial
         renderer.render();

@@ -1,4 +1,4 @@
-class Board {
+.class Board {
     constructor(size, mineCount) {
         this.size = size;
         this.mineCount = mineCount;
@@ -96,11 +96,8 @@ class Board {
         
         this.revealCell(row, col);
         
-        const solution = this.getFiftyFiftySolution();
-        if (solution) {
-            const [safeRow, safeCol] = solution;
-            this.revealCell(safeRow, safeCol);
-        }
+        // Resolver situaciones de suerte cuando no hay información
+        this.resolveLuckySituations();
         
         const victory = this.checkVictory();
         if (victory) {
@@ -129,32 +126,110 @@ class Board {
         }
     }
     
-    checkVictory() {
-        const totalSafe = this.size * this.size - this.mineCount;
-        return this.revealedCount === totalSafe;
-    }
-    
-    getFiftyFiftySolution() {
-        const unrevealed = [];
+    // Verificar si hay ALGÚN número que dé información
+    hasDeductiveInformation() {
         for (let row = 0; row < this.size; row++) {
             for (let col = 0; col < this.size; col++) {
-                if (!this.revealed[row][col] && this.grid[row][col] !== -1) {
-                    unrevealed.push([row, col]);
-                }
-            }
-        }
-        
-        if (unrevealed.length === 2) {
-            const minesRemaining = this.mineCount - this.getRevealedMinesCount();
-            if (minesRemaining === 1) {
-                for (const [row, col] of unrevealed) {
-                    if (this.grid[row][col] !== -1) {
-                        return [row, col];
+                if (this.revealed[row][col] && this.grid[row][col] > 0) {
+                    const adjacentUnrevealed = this.getAdjacentUnrevealedCells(row, col);
+                    const adjacentMines = this.countAdjacentMinesFromGrid(row, col);
+                    const revealedMines = this.countAdjacentRevealedMines(row, col);
+                    
+                    // Si hay celdas sin revelar Y no todas las minas están marcadas
+                    if (adjacentUnrevealed.length > 0 && revealedMines < adjacentMines) {
+                        return true; // Hay información disponible
                     }
                 }
             }
         }
-        return null;
+        return false; // No hay ningún número que dé información
+    }
+    
+    // Resolver situaciones de suerte
+    resolveLuckySituations() {
+        // Solo actuar si NO hay información deductiva disponible
+        while (!this.hasDeductiveInformation() && !this.gameOver && !this.checkVictory()) {
+            const progress = this.revealRandomSafeCell();
+            if (!progress) break;
+        }
+    }
+    
+    // Revelar una casilla segura al azar
+    revealRandomSafeCell() {
+        const safeCells = [];
+        for (let row = 0; row < this.size; row++) {
+            for (let col = 0; col < this.size; col++) {
+                if (!this.revealed[row][col] && this.grid[row][col] !== -1) {
+                    safeCells.push([row, col]);
+                }
+            }
+        }
+        
+        if (safeCells.length === 0) return false;
+        
+        const randomIndex = Math.floor(Math.random() * safeCells.length);
+        const [row, col] = safeCells[randomIndex];
+        
+        console.log(`🎲 Sin información disponible, revelando casilla al azar: (${row}, ${col})`);
+        this.revealCell(row, col);
+        return true;
+    }
+    
+    // Funciones auxiliares
+    getAdjacentUnrevealedCells(row, col) {
+        const cells = [];
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                if (dr === 0 && dc === 0) continue;
+                const nr = row + dr;
+                const nc = col + dc;
+                if (nr >= 0 && nr < this.size && nc >= 0 && nc < this.size) {
+                    if (!this.revealed[nr][nc]) {
+                        cells.push([nr, nc]);
+                    }
+                }
+            }
+        }
+        return cells;
+    }
+    
+    countAdjacentMinesFromGrid(row, col) {
+        let count = 0;
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                if (dr === 0 && dc === 0) continue;
+                const nr = row + dr;
+                const nc = col + dc;
+                if (nr >= 0 && nr < this.size && nc >= 0 && nc < this.size) {
+                    if (this.grid[nr][nc] === -1) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+    
+    countAdjacentRevealedMines(row, col) {
+        let count = 0;
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                if (dr === 0 && dc === 0) continue;
+                const nr = row + dr;
+                const nc = col + dc;
+                if (nr >= 0 && nr < this.size && nc >= 0 && nc < this.size) {
+                    if (this.revealed[nr][nc] && this.grid[nr][nc] === -1) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+    
+    checkVictory() {
+        const totalSafe = this.size * this.size - this.mineCount;
+        return this.revealedCount === totalSafe;
     }
     
     getRevealedMinesCount() {

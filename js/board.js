@@ -28,18 +28,16 @@ class Board {
             const row = Math.floor(idx / this.size);
             const col = idx % this.size;
             
-            // No poner mina en el primer clic ni en sus adyacentes (para garantizar seguridad)
             const isFirstCell = (row === firstRow && col === firstCol);
             const isAdjacent = Math.abs(row - firstRow) <= 1 && Math.abs(col - firstCol) <= 1;
             
             if (!isFirstCell && !isAdjacent && !this.minesPositions.has(`${row},${col}`)) {
                 this.minesPositions.add(`${row},${col}`);
-                this.grid[row][col] = -1; // -1 representa mina
+                this.grid[row][col] = -1;
                 minesPlaced++;
             }
         }
         
-        // Calcular números
         for (let row = 0; row < this.size; row++) {
             for (let col = 0; col < this.size; col++) {
                 if (this.grid[row][col] !== -1) {
@@ -65,24 +63,41 @@ class Board {
     }
     
     reveal(row, col) {
-        if (this.gameOver) return false;
-        if (row < 0 || row >= this.size || col < 0 || col >= this.size) return false;
-        if (this.revealed[row][col]) return false;
+        // Validaciones
+        if (this.gameOver) return { type: 'invalid' };
+        if (row < 0 || row >= this.size || col < 0 || col >= this.size) return { type: 'invalid' };
+        if (this.revealed[row][col]) return { type: 'already_revealed' };
         
-        // Primer movimiento
+        // Primer movimiento: colocar minas
         if (this.firstMove) {
             this.placeMines(row, col);
             this.firstMove = false;
         }
         
-        // Mina
+        // Tocar mina
         if (this.grid[row][col] === -1) {
             this.gameOver = true;
-            return false;
+            return { type: 'mine', row, col };
         }
         
+        // Revelar casilla
         this.revealCell(row, col);
-        return true;
+        
+        // Verificar y resolver 50/50 al final
+        const solution = this.getFiftyFiftySolution();
+        if (solution) {
+            const [safeRow, safeCol] = solution;
+            this.revealCell(safeRow, safeCol);
+        }
+        
+        // Verificar victoria
+        const victory = this.checkVictory();
+        if (victory) {
+            this.gameOver = true;
+            return { type: 'victory' };
+        }
+        
+        return { type: 'safe', row, col };
     }
     
     revealCell(row, col) {
@@ -93,7 +108,6 @@ class Board {
         this.revealed[row][col] = true;
         this.revealedCount++;
         
-        // Relleno automático para casillas 0
         if (this.grid[row][col] === 0) {
             for (let dr = -1; dr <= 1; dr++) {
                 for (let dc = -1; dc <= 1; dc++) {
@@ -104,50 +118,12 @@ class Board {
         }
     }
     
-    doubleClick(row, col) {
-        if (this.gameOver) return false;
-        if (!this.revealed[row][col]) return false;
-        if (this.grid[row][col] <= 0) return false;
-        
-        // Contar adyacentes no reveladas
-        let adjacentUnrevealed = [];
-        for (let dr = -1; dr <= 1; dr++) {
-            for (let dc = -1; dc <= 1; dc++) {
-                if (dr === 0 && dc === 0) continue;
-                const nr = row + dr;
-                const nc = col + dc;
-                if (nr >= 0 && nr < this.size && nc >= 0 && nc < this.size) {
-                    if (!this.revealed[nr][nc]) {
-                        adjacentUnrevealed.push([nr, nc]);
-                    }
-                }
-            }
-        }
-        
-        // Revelar todas las adyacentes no reveladas
-        let hitMine = false;
-        for (const [nr, nc] of adjacentUnrevealed) {
-            if (this.grid[nr][nc] === -1) {
-                hitMine = true;
-            } else {
-                this.revealCell(nr, nc);
-            }
-        }
-        
-        if (hitMine) {
-            this.gameOver = true;
-            return false;
-        }
-        return true;
-    }
-    
     checkVictory() {
         const totalSafe = this.size * this.size - this.mineCount;
         return this.revealedCount === totalSafe;
     }
     
     getFiftyFiftySolution() {
-        // Buscar exactamente 2 casillas sin revelar
         const unrevealed = [];
         for (let row = 0; row < this.size; row++) {
             for (let col = 0; col < this.size; col++) {
@@ -158,10 +134,8 @@ class Board {
         }
         
         if (unrevealed.length === 2) {
-            // Verificar cuál tiene mina
             const minesRemaining = this.mineCount - this.getRevealedMinesCount();
             if (minesRemaining === 1) {
-                // Revelar la que no tiene mina
                 for (const [row, col] of unrevealed) {
                     if (this.grid[row][col] !== -1) {
                         return [row, col];
@@ -173,7 +147,6 @@ class Board {
     }
     
     getRevealedMinesCount() {
-        // Contar minas ya reveladas (en derrota)
         let count = 0;
         for (let row = 0; row < this.size; row++) {
             for (let col = 0; col < this.size; col++) {

@@ -84,6 +84,9 @@ body {
     border-radius: 4px;
     cursor: pointer;
     background: #1a1a2e;
+    width: 512px;
+    height: 512px;
+    display: block;
 }
 
 .message {

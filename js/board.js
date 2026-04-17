@@ -22,7 +22,7 @@ class Board {
     placeMines(firstRow, firstCol) {
         let minesPlaced = 0;
         const totalCells = this.size * this.size;
-        let maxAttempts = totalCells * 2; // Evitar loop infinito
+        let maxAttempts = totalCells * 2;
         let attempts = 0;
         
         while (minesPlaced < this.mineCount && attempts < maxAttempts) {
@@ -41,7 +41,6 @@ class Board {
             attempts++;
         }
         
-        // Si no se pudieron colocar todas las minas (raro), llenar el resto en celdas libres
         if (minesPlaced < this.mineCount) {
             for (let row = 0; row < this.size && minesPlaced < this.mineCount; row++) {
                 for (let col = 0; col < this.size && minesPlaced < this.mineCount; col++) {
@@ -81,34 +80,28 @@ class Board {
     }
     
     reveal(row, col) {
-        // Validaciones
         if (this.gameOver) return { type: 'invalid' };
         if (row < 0 || row >= this.size || col < 0 || col >= this.size) return { type: 'invalid' };
         if (this.revealed[row][col]) return { type: 'already_revealed' };
         
-        // Primer movimiento: colocar minas
         if (this.firstMove) {
             this.placeMines(row, col);
             this.firstMove = false;
         }
         
-        // Tocar mina
         if (this.grid[row][col] === -1) {
             this.gameOver = true;
             return { type: 'mine', row, col };
         }
         
-        // Revelar casilla
         this.revealCell(row, col);
         
-        // Verificar y resolver 50/50 al final
         const solution = this.getFiftyFiftySolution();
         if (solution) {
             const [safeRow, safeCol] = solution;
             this.revealCell(safeRow, safeCol);
         }
         
-        // Verificar victoria
         const victory = this.checkVictory();
         if (victory) {
             this.gameOver = true;

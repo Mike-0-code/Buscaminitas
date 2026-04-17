@@ -1,4 +1,4 @@
-const State = {
+const GameState = {
     PLAYING: 'playing',
     VICTORY: 'victory',
     DEFEAT: 'defeat'
@@ -6,7 +6,7 @@ const State = {
 
 class GameStateManager {
     constructor() {
-        this.state = State.PLAYING;
+        this.state = GameState.PLAYING;
         this.listeners = [];
     }
     
@@ -15,8 +15,10 @@ class GameStateManager {
     }
     
     setState(newState) {
-        this.state = newState;
-        this.notifyListeners();
+        if (this.state !== newState) {
+            this.state = newState;
+            this.notifyListeners();
+        }
     }
     
     addListener(callback) {
@@ -28,20 +30,18 @@ class GameStateManager {
     }
     
     isPlaying() {
-        return this.state === State.PLAYING;
+        return this.state === GameState.PLAYING;
     }
     
     isVictory() {
-        return this.state === State.VICTORY;
+        return this.state === GameState.VICTORY;
     }
     
     isDefeat() {
-        return this.state === State.DEFEAT;
+        return this.state === GameState.DEFEAT;
     }
-}// Estados posibles
-const GameState = {
-  MENU: 'menu',           // selección de dificultad (no usado realmente)
-  PLAYING: 'playing',     // partida activa
-  VICTORY: 'victory',     // victoria - muestra animación
-  DEFEAT: 'defeat'        // derrota - muestra minas
-};
+    
+    reset() {
+        this.setState(GameState.PLAYING);
+    }
+}

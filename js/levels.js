@@ -23,4 +23,4 @@ const LEVELS = {
 
 const BOARD_SIZE = 32;
 const CELL_SIZE = 16; // píxeles
-const CANVAS_SIZE = BOARD_SIZE * CELL_SIZE; 
+const CANVAS_SIZE = BOARD_SIZE * CELL_SIZE;

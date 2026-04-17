@@ -1,72 +1,26 @@
 class InputHandler {
-    constructor(canvasId, board, renderer, gameState, onGameUpdate) {
+    constructor(canvasId, board, renderer, onReveal) {
         this.canvas = document.getElementById(canvasId);
         this.board = board;
         this.renderer = renderer;
-        this.gameState = gameState;
-        this.onGameUpdate = onGameUpdate;
-        this.lastClickTime = 0;
-        this.lastClickPos = null;
+        this.onReveal = onReveal;  // callback cuando se revela una casilla
         
         this.canvas.addEventListener('click', this.handleClick.bind(this));
-        this.canvas.addEventListener('dblclick', this.handleDoubleClick.bind(this));
     }
     
     handleClick(e) {
-        if (!this.gameState.isPlaying()) return;
-        
         const { row, col } = this.getCellFromClick(e);
         if (row === undefined) return;
         
-        const success = this.board.reveal(row, col);
+        // Intentar revelar la casilla
+        const result = this.board.reveal(row, col);
         
-        if (!success && this.board.gameOver) {
-            this.gameState.setState(State.DEFEAT);
-            this.renderer.renderAllMines(this.board.getAllMines());
-            this.onGameUpdate('¡Has perdido! 💥', 'defeat');
-        } else {
-            this.renderer.render();
-            
-            // Verificar 50/50
-            const solution = this.board.getFiftyFiftySolution();
-            if (solution) {
-                const [safeRow, safeCol] = solution;
-                this.board.reveal(safeRow, safeCol);
-                this.renderer.render();
-            }
-            
-            if (this.board.checkVictory()) {
-                this.gameState.setState(State.VICTORY);
-                this.renderer.showVictoryAnimation();
-                this.onGameUpdate('¡Victoria! 🎉 Imagen descubierta', 'victory');
-            } else {
-                this.onGameUpdate('', '');
-            }
-        }
-    }
-    
-    handleDoubleClick(e) {
-        if (!this.gameState.isPlaying()) return;
+        // Redibujar siempre
+        this.renderer.render();
         
-        const { row, col } = this.getCellFromClick(e);
-        if (row === undefined) return;
-        
-        const success = this.board.doubleClick(row, col);
-        
-        if (!success && this.board.gameOver) {
-            this.gameState.setState(State.DEFEAT);
-            this.renderer.renderAllMines(this.board.getAllMines());
-            this.onGameUpdate('¡Has perdido! 💥', 'defeat');
-        } else {
-            this.renderer.render();
-            
-            if (this.board.checkVictory()) {
-                this.gameState.setState(State.VICTORY);
-                this.renderer.showVictoryAnimation();
-                this.onGameUpdate('¡Victoria! 🎉 Imagen descubierta', 'victory');
-            } else {
-                this.onGameUpdate('', '');
-            }
+        // Notificar al main qué pasó
+        if (this.onReveal) {
+            this.onReveal(result);
         }
     }
     

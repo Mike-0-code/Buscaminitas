@@ -58,10 +58,6 @@ class Renderer {
     
     renderRevealedCell(row, col, x, y) {
         const value = this.board.grid[row][col];
-
-        // Se ve como un destello al revelar
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-        this.ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
         
         if (this.currentImage && this.currentImage.complete) {
             try {

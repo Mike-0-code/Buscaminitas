@@ -1,28 +1,27 @@
 class InputHandler {
-    constructor(canvasId, board, renderer, onReveal) {
+    constructor(canvasId, board, renderer, gameState, onReveal) {
         this.canvas = document.getElementById(canvasId);
         this.board = board;
         this.renderer = renderer;
         this.gameState = gameState;
-        this.onReveal = onReveal;  // callback cuando se revela una casilla
+        this.onReveal = onReveal;
         
-        this.canvas.addEventListener('click', this.handleClick.bind(this));
+        this.handleClick = this.handleClick.bind(this);
+        this.canvas.addEventListener('click', this.handleClick);
     }
     
     handleClick(e) {
-
         if (!this.gameState.isPlaying()) return;
+        if (this.board.gameOver) return;
         
-        const { row, col } = this.getCellFromClick(e);
-        if (row === undefined) return;
+        const cell = this.getCellFromClick(e);
+        if (!cell) return;
         
-        // Intentar revelar la casilla
+        const { row, col } = cell;
+        
         const result = this.board.reveal(row, col);
-        
-        // Redibujar siempre
         this.renderer.render();
         
-        // Notificar al main qué pasó
         if (this.onReveal) {
             this.onReveal(result);
         }
@@ -37,15 +36,20 @@ class InputHandler {
         const mouseY = (e.clientY - rect.top) * scaleY;
         
         if (mouseX < 0 || mouseX >= this.canvas.width || mouseY < 0 || mouseY >= this.canvas.height) {
-            return {};
+            return null;
         }
         
+        const CELL_SIZE = this.canvas.width / this.board.size;
         const col = Math.floor(mouseX / CELL_SIZE);
         const row = Math.floor(mouseY / CELL_SIZE);
         
-        if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) {
+        if (row >= 0 && row < this.board.size && col >= 0 && col < this.board.size) {
             return { row, col };
         }
-        return {};
+        return null;
+    }
+    
+    destroy() {
+        this.canvas.removeEventListener('click', this.handleClick);
     }
 }

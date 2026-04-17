@@ -1,3 +1,7 @@
+// TABLERO: 32x32 = 1024 celdas totales
+// Máximo de minas posible: 1015 (dejando 9 celdas libres para el primer clic)
+// Niveles actuales están muy por debajo (150-256), es seguro
+
 const LEVELS = {
     normal: {
         name: 'Normal',

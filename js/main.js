@@ -5,6 +5,114 @@ document.addEventListener('DOMContentLoaded', () => {
     let gameState = null;
     let inputHandler = null;
     
+    function initGame(difficulty) {
+        const level = LEVELS[difficulty];
+        if (!level) return;
+        
+        // Crear nuevo tablero
+        board = new Board(BOARD_SIZE, level.mines);
+        board.init();
+        
+        // Crear renderer si no existe
+        if (!renderer) {
+            renderer = new Renderer('game-canvas', board);
+        } else {
+            renderer.board = board;
+        }
+        renderer.setDifficulty(difficulty);
+        
+        // Crear game state
+        gameState = new GameStateManager();
+        
+        // Crear input handler con callback
+        inputHandler = new InputHandler('game-canvas', board, renderer, (result) => {
+            handleRevealResult(result);
+        });
+        
+        // Renderizar tablero inicial
+        renderer.render();
+        updateMessage('', '');
+    }
+    
+    function resetGame() {
+        if (!board || !renderer || !gameState) return;
+        
+        const level = LEVELS[currentDifficulty];
+        const newBoard = new Board(BOARD_SIZE, level.mines);
+        newBoard.init();
+        
+        board = newBoard;
+        renderer.board = board;
+        inputHandler.board = board;
+        gameState.setState(State.PLAYING);
+        
+        renderer.render();
+        updateMessage('', '');
+    }
+    
+    function handleRevealResult(result) {
+        switch(result.type) {
+            case 'mine':
+                gameState.setState(State.DEFEAT);
+                renderer.renderAllMines(board.getAllMines());
+                updateMessage('¡Has perdido! 💥', 'defeat');
+                break;
+                
+            case 'victory':
+                gameState.setState(State.VICTORY);
+                renderer.showVictoryAnimation();
+                updateMessage('¡Victoria! 🎉 Imagen descubierta', 'victory');
+                break;
+                
+            case 'safe':
+            case 'already_revealed':
+            case 'invalid':
+            default:
+                // No hacer nada especial
+                break;
+        }
+    }
+    
+    function updateMessage(text, type) {
+        const msgDiv = document.getElementById('message');
+        if (msgDiv) {
+            msgDiv.textContent = text;
+            msgDiv.style.color = type === 'victory' ? '#4caf50' : (type === 'defeat' ? '#ff5252' : '#aaa');
+        }
+    }
+    
+    function changeDifficulty(difficulty) {
+        currentDifficulty = difficulty;
+        initGame(difficulty);
+        
+        document.querySelectorAll('.difficulty-buttons button').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.difficulty === difficulty) {
+                btn.classList.add('active');
+            }
+        });
+    }
+    
+    // Eventos UI
+    document.querySelectorAll('.difficulty-buttons button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            changeDifficulty(btn.dataset.difficulty);
+        });
+    });
+    
+    document.getElementById('reset-btn').addEventListener('click', () => {
+        resetGame();
+    });
+    
+    // Iniciar juego
+    initGame('normal');
+});document.addEventListener('DOMContentLoaded', () => {
+    let currentDifficulty = 'normal';
+    let board = null;
+    let renderer = null;
+    let gameState = null;
+    let inputHandler = null;
+    
     function initGame(difficulty, resetOnly = false) {
         const level = LEVELS[difficulty];
         if (!level) return;

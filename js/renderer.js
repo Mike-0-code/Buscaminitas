@@ -4,7 +4,6 @@ class Renderer {
         this.ctx = this.canvas.getContext('2d');
         this.board = board;
         this.images = {
-            facil: null,
             normal: null,
             dificil: null,
             experto: null
@@ -34,15 +33,12 @@ class Renderer {
     }
     
     render() {
-        // Cancelar animación de victoria si está activa
         if (this.victoryAnimationFrame) {
             cancelAnimationFrame(this.victoryAnimationFrame);
             this.victoryAnimationFrame = null;
         }
         
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // Calcular tamaño de celda dinámicamente
         const cellSize = this.canvas.width / this.board.size;
         
         for (let row = 0; row < this.board.size; row++) {
@@ -66,7 +62,7 @@ class Renderer {
             try {
                 this.ctx.drawImage(
                     this.currentImage,
-                    col * cellSize, row * cellSize, cellSize, cellSize,
+                    0, 0, cellSize, cellSize,
                     x, y, cellSize, cellSize
                 );
             } catch(e) {
@@ -141,9 +137,8 @@ class Renderer {
         
         let alpha = 0;
         const animate = () => {
-            this.render(); // Renderizar el tablero primero
+            this.render();
             this.ctx.globalAlpha = alpha;
-            // Usar el tamaño real del canvas
             this.ctx.drawImage(this.currentImage, 0, 0, this.canvas.width, this.canvas.height);
             this.ctx.globalAlpha = 1;
             

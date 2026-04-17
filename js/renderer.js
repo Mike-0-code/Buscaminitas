@@ -59,11 +59,9 @@ class Renderer {
     renderRevealedCell(row, col, x, y) {
         const value = this.board.grid[row][col];
 
-        // Efecto "pop" - escala temporal
-        this.ctx.save();
-        this.ctx.translate(x + CELL_SIZE/2, y + CELL_SIZE/2);
-        this.ctx.scale(0.8, 0.8);
-        this.ctx.translate(-(x + CELL_SIZE/2), -(y + CELL_SIZE/2));
+        // Se ve como un destello al revelar
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        this.ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
         
         if (this.currentImage && this.currentImage.complete) {
             try {

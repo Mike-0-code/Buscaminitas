@@ -41,85 +41,86 @@ class Renderer {
         }
         
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        const cellSize = this.canvas.width / this.board.size; // ← Calcular dinámicamente
+        
+        // Calcular tamaño de celda dinámicamente
+        const cellSize = this.canvas.width / this.board.size;
         
         for (let row = 0; row < this.board.size; row++) {
             for (let col = 0; col < this.board.size; col++) {
-                const x = col * CELL_SIZE;
-                const y = row * CELL_SIZE;
+                const x = col * cellSize;
+                const y = row * cellSize;
                 
                 if (this.board.revealed[row][col]) {
-                    this.renderRevealedCell(row, col, x, y);
+                    this.renderRevealedCell(row, col, x, y, cellSize);
                 } else {
-                    this.renderHiddenCell(x, y);
+                    this.renderHiddenCell(x, y, cellSize);
                 }
             }
         }
     }
     
     renderRevealedCell(row, col, x, y, cellSize) {
-    const value = this.board.grid[row][col];
-    
-    if (this.currentImage && this.currentImage.complete) {
-        try {
-            this.ctx.drawImage(
-                this.currentImage,
-                col * cellSize, row * cellSize, cellSize, cellSize,
-                x, y, cellSize, cellSize
-            );
-        } catch(e) {
+        const value = this.board.grid[row][col];
+        
+        if (this.currentImage && this.currentImage.complete) {
+            try {
+                this.ctx.drawImage(
+                    this.currentImage,
+                    col * cellSize, row * cellSize, cellSize, cellSize,
+                    x, y, cellSize, cellSize
+                );
+            } catch(e) {
+                this.ctx.fillStyle = '#2a2a4a';
+                this.ctx.fillRect(x, y, cellSize, cellSize);
+            }
+        } else {
             this.ctx.fillStyle = '#2a2a4a';
             this.ctx.fillRect(x, y, cellSize, cellSize);
         }
-    } else {
-        this.ctx.fillStyle = '#2a2a4a';
-        this.ctx.fillRect(x, y, cellSize, cellSize);
-    }
-    
-    this.ctx.strokeStyle = '#4a4a8a';
-    this.ctx.strokeRect(x, y, cellSize, cellSize);
-    
-    if (value > 0) {
-        this.ctx.fillStyle = this.getNumberColor(value);
-        this.ctx.font = `bold ${cellSize - 4}px monospace`;
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillText(value.toString(), x + cellSize/2, y + cellSize/2);
-    } else if (value === -1 && this.board.gameOver) {
-        this.ctx.fillStyle = '#ff4444';
-        this.ctx.font = `${cellSize - 4}px monospace`;
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillText('💣', x + cellSize/2, y + cellSize/2);
-    }
-}
-
-renderHiddenCell(x, y, cellSize) {
-    this.ctx.fillStyle = '#1a1a2e';
-    this.ctx.fillRect(x, y, cellSize, cellSize);
-    this.ctx.strokeStyle = '#2a2a4a';
-    this.ctx.strokeRect(x, y, cellSize, cellSize);
-}
-
-renderAllMines(minesPositions) {
-    const cellSize = this.canvas.width / this.board.size;
-    for (const [row, col] of minesPositions) {
-        if (!this.board.revealed[row][col]) {
-            const x = col * cellSize;
-            const y = row * cellSize;
+        
+        this.ctx.strokeStyle = '#4a4a8a';
+        this.ctx.strokeRect(x, y, cellSize, cellSize);
+        
+        if (value > 0) {
+            this.ctx.fillStyle = this.getNumberColor(value);
+            this.ctx.font = `bold ${Math.max(12, cellSize - 4)}px monospace`;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText(value.toString(), x + cellSize/2, y + cellSize/2);
+        } else if (value === -1 && this.board.gameOver) {
             this.ctx.fillStyle = '#ff4444';
-            this.ctx.fillRect(x, y, cellSize, cellSize);
-            this.ctx.fillStyle = '#fff';
-            this.ctx.font = `${cellSize - 4}px monospace`;
+            this.ctx.font = `${Math.max(12, cellSize - 4)}px monospace`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             this.ctx.fillText('💣', x + cellSize/2, y + cellSize/2);
-            this.ctx.strokeStyle = '#ff8888';
-            this.ctx.strokeRect(x, y, cellSize, cellSize);
         }
     }
-}
+
+    renderHiddenCell(x, y, cellSize) {
+        this.ctx.fillStyle = '#1a1a2e';
+        this.ctx.fillRect(x, y, cellSize, cellSize);
+        this.ctx.strokeStyle = '#2a2a4a';
+        this.ctx.strokeRect(x, y, cellSize, cellSize);
+    }
+
+    renderAllMines(minesPositions) {
+        const cellSize = this.canvas.width / this.board.size;
+        for (const [row, col] of minesPositions) {
+            if (!this.board.revealed[row][col]) {
+                const x = col * cellSize;
+                const y = row * cellSize;
+                this.ctx.fillStyle = '#ff4444';
+                this.ctx.fillRect(x, y, cellSize, cellSize);
+                this.ctx.fillStyle = '#fff';
+                this.ctx.font = `${Math.max(12, cellSize - 4)}px monospace`;
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillText('💣', x + cellSize/2, y + cellSize/2);
+                this.ctx.strokeStyle = '#ff8888';
+                this.ctx.strokeRect(x, y, cellSize, cellSize);
+            }
+        }
+    }
 
     getNumberColor(value) {
         const colors = {
@@ -142,7 +143,8 @@ renderAllMines(minesPositions) {
         const animate = () => {
             this.render(); // Renderizar el tablero primero
             this.ctx.globalAlpha = alpha;
-            this.ctx.drawImage(this.currentImage, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            // Usar el tamaño real del canvas
+            this.ctx.drawImage(this.currentImage, 0, 0, this.canvas.width, this.canvas.height);
             this.ctx.globalAlpha = 1;
             
             alpha += 0.05;

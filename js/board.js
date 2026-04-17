@@ -96,8 +96,17 @@ class Board {
         
         this.revealCell(row, col);
         
-        // Resolver situaciones de suerte cuando no hay información
-        this.resolveLuckySituations();
+        // Primero intentar el 50/50 clásico (2 celdas)
+        const solution = this.getFiftyFiftySolution();
+        if (solution) {
+            const [safeRow, safeCol] = solution;
+            this.revealCell(safeRow, safeCol);
+        }
+        
+        // Si no hay solución de 50/50, intentar resolver situaciones de suerte
+        if (!solution) {
+            this.resolveLuckySituations();
+        }
         
         const victory = this.checkVictory();
         if (victory) {
@@ -132,25 +141,22 @@ class Board {
             for (let col = 0; col < this.size; col++) {
                 if (this.revealed[row][col] && this.grid[row][col] > 0) {
                     const adjacentUnrevealed = this.getAdjacentUnrevealedCells(row, col);
-                    const adjacentMines = this.countAdjacentMinesFromGrid(row, col);
-                    const revealedMines = this.countAdjacentRevealedMines(row, col);
                     
-                    // Si hay celdas sin revelar Y no todas las minas están marcadas
-                    if (adjacentUnrevealed.length > 0 && revealedMines < adjacentMines) {
-                        return true; // Hay información disponible
+                    // Si hay celdas sin revelar alrededor de un número
+                    if (adjacentUnrevealed.length > 0) {
+                        return true; // Hay información potencial disponible
                     }
                 }
             }
         }
-        return false; // No hay ningún número que dé información
+        return false;
     }
     
-    // Resolver situaciones de suerte
+    // Resolver situaciones de suerte (cuando no hay información deductiva)
     resolveLuckySituations() {
         // Solo actuar si NO hay información deductiva disponible
-        while (!this.hasDeductiveInformation() && !this.gameOver && !this.checkVictory()) {
-            const progress = this.revealRandomSafeCell();
-            if (!progress) break;
+        if (!this.hasDeductiveInformation() && !this.gameOver && !this.checkVictory()) {
+            this.revealRandomSafeCell();
         }
     }
     
@@ -170,7 +176,7 @@ class Board {
         const randomIndex = Math.floor(Math.random() * safeCells.length);
         const [row, col] = safeCells[randomIndex];
         
-        console.log(`🎲 Sin información disponible, revelando casilla al azar: (${row}, ${col})`);
+        console.log(`🎲 Sin información deductiva, revelando casilla al azar: (${row}, ${col})`);
         this.revealCell(row, col);
         return true;
     }
@@ -230,6 +236,29 @@ class Board {
     checkVictory() {
         const totalSafe = this.size * this.size - this.mineCount;
         return this.revealedCount === totalSafe;
+    }
+    
+    getFiftyFiftySolution() {
+        const unrevealed = [];
+        for (let row = 0; row < this.size; row++) {
+            for (let col = 0; col < this.size; col++) {
+                if (!this.revealed[row][col] && this.grid[row][col] !== -1) {
+                    unrevealed.push([row, col]);
+                }
+            }
+        }
+        
+        if (unrevealed.length === 2) {
+            const minesRemaining = this.mineCount - this.getRevealedMinesCount();
+            if (minesRemaining === 1) {
+                for (const [row, col] of unrevealed) {
+                    if (this.grid[row][col] !== -1) {
+                        return [row, col];
+                    }
+                }
+            }
+        }
+        return null;
     }
     
     getRevealedMinesCount() {

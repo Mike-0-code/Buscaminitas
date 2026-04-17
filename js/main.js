@@ -48,16 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
         gameState.addListener((state) => {
             if (state === GameState.VICTORY) {
                 renderer.showVictoryAnimation();
-                updateMessage('¡Victoria! 🎉 Imagen descubierta', 'victory');
-            } else if (state === GameState.DEFEAT) {
-                updateMessage('¡Has perdido! 💥', 'defeat');
-            }
         });
         
         // Renderizar tablero inicial
         renderer.render();
-        updateMessage('', '');
-        
         console.log('Juego iniciado con dificultad:', difficulty);
     }
     
@@ -72,10 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderer.board = board;
         inputHandler.board = board;
         gameState.reset();
-        
         renderer.render();
-        updateMessage('', '');
-        
         console.log('Juego reiniciado');
     }
     

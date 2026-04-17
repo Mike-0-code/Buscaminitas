@@ -3,12 +3,16 @@ class InputHandler {
         this.canvas = document.getElementById(canvasId);
         this.board = board;
         this.renderer = renderer;
+        this.gameState = gameState;
         this.onReveal = onReveal;  // callback cuando se revela una casilla
         
         this.canvas.addEventListener('click', this.handleClick.bind(this));
     }
     
     handleClick(e) {
+
+        if (!this.gameState.isPlaying()) return;
+        
         const { row, col } = this.getCellFromClick(e);
         if (row === undefined) return;
         

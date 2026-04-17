@@ -1,4 +1,4 @@
-.class Board {
+class Board {
     constructor(size, mineCount) {
         this.size = size;
         this.mineCount = mineCount;

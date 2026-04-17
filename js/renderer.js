@@ -10,6 +10,7 @@ class Renderer {
             experto: null
         };
         this.currentImage = null;
+        this.victoryAnimationFrame = null;
         this.loadImages();
     }
     
@@ -33,6 +34,12 @@ class Renderer {
     }
     
     render() {
+        // Cancelar animación de victoria si está activa
+        if (this.victoryAnimationFrame) {
+            cancelAnimationFrame(this.victoryAnimationFrame);
+            this.victoryAnimationFrame = null;
+        }
+        
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
         for (let row = 0; row < this.board.size; row++) {
@@ -52,7 +59,6 @@ class Renderer {
     renderRevealedCell(row, col, x, y) {
         const value = this.board.grid[row][col];
         
-        // Dibujar fragmento de imagen de fondo si existe
         if (this.currentImage && this.currentImage.complete) {
             try {
                 this.ctx.drawImage(
@@ -69,19 +75,16 @@ class Renderer {
             this.ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
         }
         
-        // Borde de celda revelada
         this.ctx.strokeStyle = '#4a4a8a';
         this.ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
         
-        // Dibujar número si no es mina
         if (value > 0) {
             this.ctx.fillStyle = this.getNumberColor(value);
             this.ctx.font = `bold ${CELL_SIZE - 4}px monospace`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             this.ctx.fillText(value.toString(), x + CELL_SIZE/2, y + CELL_SIZE/2);
-        } else if (value === -1) {
-            // Dibujar mina
+        } else if (value === -1 && this.board.gameOver) {
             this.ctx.fillStyle = '#ff4444';
             this.ctx.font = `${CELL_SIZE - 4}px monospace`;
             this.ctx.textAlign = 'center';
@@ -113,36 +116,43 @@ class Renderer {
     
     renderAllMines(minesPositions) {
         for (const [row, col] of minesPositions) {
-            const x = col * CELL_SIZE;
-            const y = row * CELL_SIZE;
-            this.ctx.fillStyle = '#ff4444';
-            this.ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-            this.ctx.fillStyle = '#fff';
-            this.ctx.font = `${CELL_SIZE - 4}px monospace`;
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.fillText('💣', x + CELL_SIZE/2, y + CELL_SIZE/2);
-            this.ctx.strokeStyle = '#ff8888';
-            this.ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
+            if (!this.board.revealed[row][col]) {
+                const x = col * CELL_SIZE;
+                const y = row * CELL_SIZE;
+                this.ctx.fillStyle = '#ff4444';
+                this.ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                this.ctx.fillStyle = '#fff';
+                this.ctx.font = `${CELL_SIZE - 4}px monospace`;
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillText('💣', x + CELL_SIZE/2, y + CELL_SIZE/2);
+                this.ctx.strokeStyle = '#ff8888';
+                this.ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
+            }
         }
     }
     
     showVictoryAnimation() {
-        if (this.currentImage && this.currentImage.complete) {
-            // Mostrar imagen completa con efecto fade
-            this.ctx.globalAlpha = 0;
+        if (!this.currentImage || !this.currentImage.complete) return;
+        
+        let alpha = 0;
+        const animate = () => {
+            this.render(); // Renderizar el tablero primero
+            this.ctx.globalAlpha = alpha;
             this.ctx.drawImage(this.currentImage, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            this.ctx.globalAlpha = 1;
             
-            let alpha = 0;
-            const animate = () => {
-                alpha += 0.05;
-                this.ctx.globalAlpha = Math.min(alpha, 1);
-                this.ctx.drawImage(this.currentImage, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
-                if (alpha < 1) {
-                    requestAnimationFrame(animate);
-                }
-            };
-            requestAnimationFrame(animate);
+            alpha += 0.05;
+            if (alpha < 1) {
+                this.victoryAnimationFrame = requestAnimationFrame(animate);
+            } else {
+                this.victoryAnimationFrame = null;
+            }
+        };
+        
+        if (this.victoryAnimationFrame) {
+            cancelAnimationFrame(this.victoryAnimationFrame);
         }
+        this.victoryAnimationFrame = requestAnimationFrame(animate);
     }
 }

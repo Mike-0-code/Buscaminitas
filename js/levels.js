@@ -1,23 +1,22 @@
 // TABLERO: 32x32 = 1024 celdas totales
 // Máximo de minas posible: 1015 (dejando 9 celdas libres para el primer clic)
-// Niveles actuales están muy por debajo (150-256), es seguro
 
 const LEVELS = {
     normal: {
         name: 'Normal',
-        mines: 150,
+        mines: 120,
         size: 32,
         image: 'assets/normal.png'
     },
     dificil: {
         name: 'Difícil',
-        mines: 200,
+        mines: 180,
         size: 32,
         image: 'assets/dificil.png'
     },
     experto: {
         name: 'Experto',
-        mines: 256,
+        mines: 260,
         size: 32,
         image: 'assets/experto.png'
     }

@@ -6,16 +6,19 @@ const LEVELS = {
     normal: {
         name: 'Normal',
         mines: 150,
+        size: 32,
         image: 'assets/normal.png'
     },
     dificil: {
         name: 'Difícil',
         mines: 200,
+        size: 32,
         image: 'assets/dificil.png'
     },
     experto: {
         name: 'Experto',
         mines: 256,
+        size: 32,
         image: 'assets/experto.png'
     }
 };

@@ -81,6 +81,7 @@ body {
     width: min(95vw, 95vh, 512px);
     height: min(95vw, 95vh, 512px);
     display: block;
+    touch-action: pinch-zoom;
 }
 
 .mine-counter {

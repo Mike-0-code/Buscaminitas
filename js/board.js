@@ -22,8 +22,10 @@ class Board {
     placeMines(firstRow, firstCol) {
         let minesPlaced = 0;
         const totalCells = this.size * this.size;
+        let maxAttempts = totalCells * 2; // Evitar loop infinito
+        let attempts = 0;
         
-        while (minesPlaced < this.mineCount) {
+        while (minesPlaced < this.mineCount && attempts < maxAttempts) {
             const idx = Math.floor(Math.random() * totalCells);
             const row = Math.floor(idx / this.size);
             const col = idx % this.size;
@@ -35,6 +37,22 @@ class Board {
                 this.minesPositions.add(`${row},${col}`);
                 this.grid[row][col] = -1;
                 minesPlaced++;
+            }
+            attempts++;
+        }
+        
+        // Si no se pudieron colocar todas las minas (raro), llenar el resto en celdas libres
+        if (minesPlaced < this.mineCount) {
+            for (let row = 0; row < this.size && minesPlaced < this.mineCount; row++) {
+                for (let col = 0; col < this.size && minesPlaced < this.mineCount; col++) {
+                    const isFirstCell = (row === firstRow && col === firstCol);
+                    const isAdjacent = Math.abs(row - firstRow) <= 1 && Math.abs(col - firstCol) <= 1;
+                    if (!isFirstCell && !isAdjacent && this.grid[row][col] !== -1) {
+                        this.grid[row][col] = -1;
+                        this.minesPositions.add(`${row},${col}`);
+                        minesPlaced++;
+                    }
+                }
             }
         }
         

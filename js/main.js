@@ -24,8 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
             inputHandler.destroy();
         }
         
-        // Crear nuevo tablero
-        board = new Board(BOARD_SIZE, level.mines);
+        // Crear nuevo tablero usando el tamaño del nivel
+        board = new Board(level.size, level.mines);
         board.init();
         
         // Crear o actualizar renderer
@@ -45,11 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Configurar listener de gameState para actualizar UI automáticamente
-gameState.addListener((state) => {
-    if (state === GameState.VICTORY) {
-        renderer.showVictoryAnimation();
-    }
-});
+        gameState.addListener((state) => {
+            if (state === GameState.VICTORY) {
+                renderer.showVictoryAnimation();
+            }
+        });
         
         // Renderizar tablero inicial
         renderer.render();
@@ -60,7 +60,7 @@ gameState.addListener((state) => {
         if (!board || !renderer || !gameState) return;
         
         const level = LEVELS[currentDifficulty];
-        const newBoard = new Board(BOARD_SIZE, level.mines);
+        const newBoard = new Board(level.size, level.mines);
         newBoard.init();
         
         board = newBoard;

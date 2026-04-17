@@ -40,8 +40,10 @@ body {
     justify-content: center;
 }
 
+/* Estilos unificados para todos los elementos del top-bar */
 .difficulty-buttons button,
-.reset-btn {
+.reset-btn,
+.mine-counter {
     background: #2a2a4a;
     border: none;
     color: #aaa;
@@ -52,6 +54,11 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
+    line-height: 1.2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
 .difficulty-buttons button:hover,
@@ -59,6 +66,15 @@ body {
     background: #3a3a6a;
     color: #fff;
     transform: scale(1.02);
+}
+
+/* El contador no necesita hover igual que los botones */
+.mine-counter {
+    cursor: default;
+}
+
+.mine-counter:hover {
+    transform: none;
 }
 
 .difficulty-buttons button.active {
@@ -84,19 +100,6 @@ body {
     touch-action: pinch-zoom;
 }
 
-.mine-counter {
-    background: #2a2a4a;
-    padding: clamp(6px, 1.5vw, 12px) clamp(12px, 3vw, 24px);
-    border-radius: clamp(4px, 1.5vw, 10px);
-    font-size: clamp(0.7rem, 4vw, 1rem);
-    font-weight: bold;
-    color: #aaa;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
 .mine-counter span {
     color: #ff5252;
     font-family: monospace;
@@ -105,7 +108,8 @@ body {
 
 @media (max-width: 480px) {
     .difficulty-buttons button,
-    .reset-btn {
+    .reset-btn,
+    .mine-counter {
         white-space: normal;
         font-size: 0.65rem;
         padding: clamp(4px, 1.5vw, 8px) clamp(8px, 2vw, 12px);
@@ -114,7 +118,8 @@ body {
 
 @media (min-width: 1920px) {
     .difficulty-buttons button,
-    .reset-btn {
+    .reset-btn,
+    .mine-counter {
         font-size: 1.1rem;
         padding: 12px 28px;
     }

@@ -15,7 +15,7 @@ class Renderer {
     }
     
     loadImages() {
-        const levels = ['facil', 'normal', 'dificil', 'experto'];
+        const levels = ['normal', 'dificil', 'experto'];
         levels.forEach(level => {
             const img = new Image();
             img.src = `assets/${level}.png`;

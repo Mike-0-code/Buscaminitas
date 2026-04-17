@@ -100,7 +100,6 @@ body {
     display: block;
 }
 
-/* Solo para pantallas muy pequeñas (menos de 480px) */
 @media (max-width: 480px) {
     .difficulty-buttons button {
         white-space: normal;
@@ -114,7 +113,6 @@ body {
     }
 }
 
-/* Para pantallas muy grandes (más de 1920px) */
 @media (min-width: 1920px) {
     .difficulty-buttons button {
         font-size: 1.1rem;

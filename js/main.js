@@ -104,8 +104,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateMessage(text, type) {
         const msgDiv = document.getElementById('message');
         if (msgDiv) {
-            msgDiv.textContent = text;
-            msgDiv.style.color = type === 'victory' ? '#4caf50' : (type === 'defeat' ? '#ff5252' : '#aaa');
+            msgDiv.textContent = text || (type === 'victory' ? '¡VICTORIA!' : type === 'defeat' ? 'DERROTA' : '▶ Juego listo');
+            msgDiv.classList.remove('victory', 'defeat');
+            if (type === 'victory') {
+                msgDiv.classList.add('victory');
+            } else if (type === 'defeat') {
+                msgDiv.classList.add('defeat');
+            }
         }
     }
     

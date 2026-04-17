@@ -101,19 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    function updateMessage(text, type) {
-        const msgDiv = document.getElementById('message');
-        if (msgDiv) {
-            msgDiv.textContent = text || (type === 'victory' ? '¡VICTORIA!' : type === 'defeat' ? 'DERROTA' : '▶ Juego listo');
-            msgDiv.classList.remove('victory', 'defeat');
-            if (type === 'victory') {
-                msgDiv.classList.add('victory');
-            } else if (type === 'defeat') {
-                msgDiv.classList.add('defeat');
-            }
-        }
-    }
-    
     function changeDifficulty(difficulty) {
         currentDifficulty = difficulty;
         // ========== NUEVO: Guardar en localStorage ==========

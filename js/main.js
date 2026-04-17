@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gameState = new GameStateManager();
         
         // Crear input handler con callback
-        inputHandler = new InputHandler('game-canvas', board, renderer, (result) => {
+        inputHandler = new InputHandler('game-canvas', board, renderer, gameState, (result) => {
             handleRevealResult(result);
         });
         

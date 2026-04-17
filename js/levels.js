@@ -1,9 +1,4 @@
 const LEVELS = {
-    facil: {
-        name: 'Fácil',
-        mines: 100,
-        image: 'assets/facil.png'
-    },
     normal: {
         name: 'Normal',
         mines: 150,
